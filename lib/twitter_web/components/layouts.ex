@@ -1,0 +1,14 @@
+defmodule TwitterWeb.Layouts do
+  @moduledoc """
+  This module holds different layouts used by your application.
+
+  See the `layouts` directory for all templates available.
+  The "root" layout is a skeleton rendered as part of the
+  application router. The "app" layout is set as the default
+  layout on both `use TwitterWeb, :controller` and
+  `use TwitterWeb, :live_view`.
+  """
+  use TwitterWeb, :html
+
+  embed_templates "layouts/*"
+end
