@@ -31,34 +31,34 @@ defmodule TwitterWeb.TimelineLive do
 		{:noreply, assign(socket, :username, username)}
 	end
 
-	def handle_event("save-post", %{"content" => content}, socket)
-		when content != "" and byte_size(content) <= @max_tweet_length and not is_nil(socket.assigns.username) do
-		case Timeline.create_tweet(%{
-			content: content,
-			username: socket.assigns.username,
-			likes_count: 0
-		}) do
-			{:ok, tweet} ->
-				{:noreply,
-				 socket
-				 |> update(:tweets, fn tweets -> [tweet | tweets] end)
-				 |> assign(:char_count, 0)
-				 |> assign(:content, "")
-				 |> put_flash(:info, "Tweet posted successfully!")}
+	def handle_event("save-post", %{"content" => content}, socket) do
+		content = String.trim(content)
+		char_count = String.length(content)
 
-			{:error, %Ecto.Changeset{} = changeset} ->
-				{:noreply, assign(socket, changeset: changeset)}
-		end
-	end
-
-	def handle_event("save-post", _, socket) do
 		cond do
 			is_nil(socket.assigns.username) ->
 				{:noreply, put_flash(socket, :error, "Please enter a username first")}
-			socket.assigns.char_count > @max_tweet_length ->
+			content == "" ->
+				{:noreply, put_flash(socket, :error, "Tweet cannot be empty")}
+			char_count > @max_tweet_length ->
 				{:noreply, put_flash(socket, :error, "Tweet is too long (maximum is 140 characters)")}
 			true ->
-				{:noreply, put_flash(socket, :error, "Tweet cannot be empty")}
+				case Timeline.create_tweet(%{
+					content: content,
+					username: socket.assigns.username,
+					likes_count: 0
+				}) do
+					{:ok, tweet} ->
+						{:noreply,
+						 socket
+						 |> update(:tweets, fn tweets -> [tweet | tweets] end)
+						 |> assign(:char_count, 0)
+						 |> assign(:content, "")
+						 |> put_flash(:info, "Tweet posted successfully!")}
+
+					{:error, %Ecto.Changeset{} = changeset} ->
+						{:noreply, assign(socket, changeset: changeset)}
+				end
 		end
 	end
 
