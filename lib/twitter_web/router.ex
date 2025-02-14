@@ -17,7 +17,6 @@ defmodule TwitterWeb.Router do
   scope "/", TwitterWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     live "/", TimelineLive
   end
 
